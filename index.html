@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>Ask Krshn - Your Bhagavad Gita Assistant</title>
+    <meta name="description" content="Get answers to your life's questions directly from the wisdom of the Bhagavad Gita. Ask Krshn is your personal AI spiritual guide.">
+    <meta name="keywords" content="Bhagavad Gita, Krishna, AI Chatbot, Spiritual Guidance, Karma, Dharma, Life Questions">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-website-url.com/">
+    <meta property="og:title" content="Ask Krshn - Your Bhagavad Gita Assistant">
+    <meta property="og:description" content="Get answers to your life's questions directly from the wisdom of the Bhagavad Gita.">
+    <meta property="og:image" content="https://your-website-url.com/og-image.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://your-website-url.com/">
+    <meta property="twitter:title" content="Ask Krshn - Your Bhagavad Gita Assistant">
+    <meta property="twitter:description" content="Get answers to your life's questions directly from the wisdom of the Bhagavad Gita.">
+    <meta property="twitter:image" content="https://your-website-url.com/twitter-image.jpg">
+
+    <style>
+        /* CSS Styles */
+        :root {
+            --bg-color: #FDF5E6; /* Soft Beige */
+            --primary-color: #FF9933; /* Orange */
+            --text-color: #4A2E2C;
+            --header-footer-bg: #FFFBF2;
+            --user-msg-bg: #E0E0E0;
+            --bot-msg-bg: #FFFFFF;
+            --font-family: 'Poppins', sans-serif;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Tiro+Devanagari+Sanskrit&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--header-footer-bg);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            z-index: 10;
+        }
+
+        /* Main Chat Area */
+        #chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #chat-window {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: var(--user-msg-bg);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            background-color: var(--bot-msg-bg);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            box-shadow: var(--box-shadow);
+            position: relative;
+        }
+        
+        .bot-message .shlok {
+            font-family: 'Tiro Devanagari Sanskrit', serif;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 10px 0;
+            padding: 10px;
+            background: #FFFBF2;
+            border-left: 3px solid var(--primary-color);
+            border-radius: 5px;
+        }
+
+        .bot-message .speaker-icon {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .bot-message .speaker-icon:hover {
+            opacity: 1;
+        }
+
+        .typing-indicator {
+            align-self: flex-start;
+            padding: 10px 15px;
+        }
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+            animation: typing 1s infinite;
+            margin: 0 2px;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Input Form */
+        #chat-form {
+            display: flex;
+            padding: 15px;
+            background: var(--header-footer-bg);
+            border-top: 1px solid #ddd;
+        }
+
+        #message-input {
+            flex-grow: 1;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        #message-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        #chat-form button {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.3s;
+            box-shadow: 0 0 0 rgba(255, 153, 51, 0.7);
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(255, 153, 51, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 153, 51, 1); }
+            100% { box-shadow: 0 0 5px rgba(255, 153, 51, 0.5); }
+        }
+
+        #chat-form button:hover {
+            transform: scale(1.1);
+            animation: glow 1.5s infinite;
+        }
+
+        #chat-form button svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        /* Footer Actions */
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: var(--header-footer-bg);
+        }
+
+        footer button {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 15px;
+            margin: 0 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        footer button:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            body {
+                justify-content: center;
+                align-items: center;
+            }
+            #app-container {
+                width: 450px;
+                height: 85vh;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <header>Ask Krshn</header>
+        
+        <div id="chat-container">
+            <div id="chat-window">
+                <!-- Greeting Message -->
+                <div class="message bot-message">
+                    Pranam! I am Ask Krshn, your spiritual guide. Ask me any question about life, karma, or purpose, and I shall answer from the timeless wisdom of the Bhagavad Gita. How may I help you today?
+                </div>
+            </div>
+
+            <form id="chat-form">
+                <input type="text" id="message-input" placeholder="Type your question here..." autocomplete="off" required>
+                <button type="submit" aria-label="Send Message">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+                </button>
+            </form>
+        </div>
+
+        <footer>
+            <button id="export-pdf-btn">Export Chat to PDF</button>
+            <button id="share-whatsapp-btn">Share on WhatsApp</button>
+        </footer>
+    </div>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // ========== PASTE FIREBASE v9+ MODULAR CONFIG ==========
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        const firebaseConfig = {
+  apiKey: "AIzaSyCqQqJWMl3naW8Ad8_lpoFQyuzSjTJs8N8",
+  authDomain: "skater-13f74.firebaseapp.com",
+  databaseURL: "https://skater-13f74-default-rtdb.firebaseio.com",
+  projectId: "skater-13f74",
+  storageBucket: "skater-13f74.firebasestorage.app",
+  messagingSenderId: "750747470830",
+  appId: "1:750747470830:web:2deefa64a23e45d3ae9cff"
+};
+        // ======================= END CONFIG =======================
+
+
+        // ========== GOOGLE AI STUDIO API KEY CONFIG ==========
+const AI_API_KEY = "%AI_API_KEY%";
+        // ======================= END CONFIG =======================
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // --- Global Variables & DOM Elements ---
+        let gitaDataContext = null; // To cache Gita data
+        const chatWindow = document.getElementById('chat-window');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const exportPdfBtn = document.getElementById('export-pdf-btn');
+        const shareWhatsAppBtn = document.getElementById('share-whatsapp-btn');
+
+        // --- Core Functions ---
+
+        /**
+         * Fetches all shloks from Firebase and caches them.
+         */
+        async function fetchAndCacheGitaData() {
+            console.log("Fetching Gita data from Firebase...");
+            try {
+                const shloksRef = ref(database, 'shloks');
+                const snapshot = await get(shloksRef);
+                if (snapshot.exists()) {
+                    gitaDataContext = snapshot.val();
+                    console.log("Gita data loaded and cached successfully.");
+                } else {
+                    console.error("No data found at /shloks path in Firebase.");
+                    displayMessage("Sorry, I am unable to access the Gita's wisdom right now. Please check the database connection.", 'bot');
+                }
+            } catch (error) {
+                console.error("Error fetching data from Firebase:", error);
+                displayMessage("An error occurred while connecting to the knowledge base. Please try again later.", 'bot');
+            }
+        }
+
+        /**
+         * Sends user message to the AI and gets a response.
+         * @param {string} userMessage - The user's question.
+         */
+        async function getAIResponse(userMessage) {
+            if (!gitaDataContext) {
+                displayMessage("My knowledge base is not loaded yet. Please wait a moment and try again.", 'bot');
+                return;
+            }
+            if (!AI_API_KEY || AI_API_KEY === "YOUR_GOOGLE_AI_STUDIO_API_KEY") {
+                displayMessage("The connection to the divine wisdom (AI API Key) is not configured. Please ask the administrator to set it up.", 'bot');
+                return;
+            }
+
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${AI_API_KEY}`;
+            
+            const systemInstruction = `You are a wise and compassionate Bhagavad Gita expert named 'Ask Krshn'. Your purpose is to provide spiritual guidance based ONLY on the provided context of Bhagavad Gita shlokas and their explanations.
+
+            **CONTEXT:**
+            ${JSON.stringify(gitaDataContext)}
+            
+            **INSTRUCTIONS:**
+            1.  Strictly analyze the user's question.
+            2.  Find the MOST relevant chapter, verse, shlok, and explanation from the CONTEXT provided above to answer the user's question.
+            3.  Auto-detect the user's language (e.g., English, Hindi, Hinglish, Bengali) and respond ONLY in that same language.
+            4.  NEVER invent or use any information outside of the provided CONTEXT.
+            5.  Structure your response in the following format, replacing the placeholders:
+                
+                Chapter [Chapter Number] - Verse [Verse Number]
+                
+                **Shlok:**
+                [Sanskrit Shlok Text]
+                
+                **Answer:**
+                [Your detailed explanation, connecting the shlok directly to the user's question in a respectful and educational tone.]
+            
+            If you cannot find a relevant shlok in the context to answer the question, you must respond with: "I apologize, but I couldn't find a specific verse in my current knowledge that directly answers your question. Perhaps you could rephrase it?"`;
+
+            showTypingIndicator();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: systemInstruction + "\n\n**User's Question:** " + userMessage }]
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const botResponse = data.candidates[0].content.parts[0].text;
+                displayMessage(botResponse, 'bot');
+
+            } catch (error) {
+                console.error("Error calling AI API:", error);
+                displayMessage("I am facing some trouble in contemplating the answer. Please try again in a moment.", 'bot');
+            } finally {
+                hideTypingIndicator();
+            }
+        }
+
+        /**
+         * Displays a message in the chat window.
+         * @param {string} text - The message content.
+         * @param {string} sender - 'user' or 'bot'.
+         */
+        function displayMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', `${sender}-message`);
+            
+            // Sanitize and format bot response
+            if (sender === 'bot') {
+                let formattedText = text
+                    .replace(/</g, "&lt;").replace(/>/g, "&gt;") // Basic sanitation
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                    .replace(/Chapter\s*(\d+)\s*-\s*Verse\s*(\d+)/, '<h4>Chapter $1 - Verse $2</h4>')
+                    .replace(/Shlok:/, '<div class="shlok">')
+                    .replace(/Answer:/, '</div><p><strong>Answer:</strong><br>');
+                
+                messageDiv.innerHTML = formattedText + '</p>';
+                
+                // Add speaker icon for TTS
+                const speakerIcon = document.createElement('img');
+                speakerIcon.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzcyNzI3MiIgd2lkdGg9IjI0cHgiIGhlaWdodD0iMjRweCI+PHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0mbm4B8PSIiLz48cGF0aCBkPSJNMzEgOXY2SDd2LTZoLTR2NmMwIDMuMzEgMi42OSA2IDYgNnY0bDQgNGg0di04aDRsNCA0di00YzMuMzEgMCA2LTIuNjkgNi02di02aC00em0zIDhjMCAxLjY2LTEuMzQgMy0zIDNIMTBjLTEuNjYgMC0zLTEuMzQtMy0zdi0xYzAtLjU1LjQ1LTEgMS0xaDE0Yy41NSAwIDEgLjQ1IDEgMXYxem0tMy01SDdjLTEuMSAwLTIgLjg5LTIgMnY2aDJWMTRoMTR2OWgydi02YzAtMS4xLS45LTItMi0yeiIvPjwvc3ZnPg==';
+speakerIcon.alt = 'Read aloud';
+speakerIcon.classList.add('speaker-icon');
+speakerIcon.onclick = () => speakText(messageDiv.innerText);
+messageDiv.appendChild(speakerIcon);        } else {
+            messageDiv.textContent = text;
+        }
+        
+        chatWindow.appendChild(messageDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
+    }
+
+    /**
+     * Shows the typing indicator.
+     */
+    function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.id = 'typing-indicator';
+        typingDiv.classList.add('message', 'typing-indicator');
+        typingDiv.innerHTML = '<span></span><span></span><span></span>';
+        chatWindow.appendChild(typingDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    /**
+     * Hides the typing indicator.
+     */
+    function hideTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
+    /**
+     * Handles the form submission.
+     * @param {Event} e - The form submission event.
+     */
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        const userMessage = messageInput.value.trim();
+        if (userMessage) {
+            displayMessage(userMessage, 'user');
+            getAIResponse(userMessage);
+            messageInput.value = '';
+        }
+    }
+
+    /**
+     * Uses the browser's SpeechSynthesis API to read text aloud.
+     * @param {string} text - The text to be spoken.
+     */
+    function speakText(text) {
+        // Clean up text for better speech
+        const cleanText = text.replace(/Chapter \d+ - Verse \d+/, '').replace('Shlok:', '').replace('Answer:', '');
+        
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        
+        // Basic language detection for TTS voice selection
+        // This is a simple implementation. A more robust solution might use a library.
+        if (/[\u0900-\u097F]/.test(cleanText)) { // Devanagari characters
+             utterance.lang = 'hi-IN';
+        } else if (/[\u0980-\u09FF]/.test(cleanText)) { // Bengali characters
+            utterance.lang = 'bn-IN';
+        } else {
+            utterance.lang = 'en-US'; // Default to English
+        }
+
+        speechSynthesis.cancel(); // Stop any previous speech
+        speechSynthesis.speak(utterance);
+    }
+
+    /**
+     * Exports the current chat history to a PDF file.
+     */
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        let y = 15; // Vertical position in PDF
+        const margin = 10;
+        const maxWidth = 180;
+
+        doc.setFontSize(18);
+        doc.text("Ask Krshn - Chat History", margin, y);
+        y += 15;
+
+        doc.setFontSize(12);
+        const messages = chatWindow.querySelectorAll('.message');
+
+        messages.forEach(message => {
+            const isUser = message.classList.contains('user-message');
+            const title = isUser ? "You:" : "Ask Krshn:";
+            
+            doc.setFont(undefined, 'bold');
+            doc.text(title, margin, y);
+            y += 6;
+            
+            doc.setFont(undefined, 'normal');
+            const textLines = doc.splitTextToSize(message.innerText, maxWidth);
+            
+            // Check if new text will exceed page height
+            if (y + (textLines.length * 5) > 280) {
+                doc.addPage();
+                y = 15;
+            }
+            
+            doc.text(textLines, margin, y);
+            y += textLines.length * 5 + 10;
+        });
+        
+        doc.save("Ask-Krshn-Chat.pdf");
+    }
+
+    /**
+     * Shares a predefined message on WhatsApp.
+     */
+    function shareOnWhatsApp() {
+        const text = encodeURIComponent("Check out Ask Krshn, a Bhagavad Gita AI assistant. Get answers to your life's questions!");
+        const url = encodeURIComponent(window.location.href); // Or your actual website URL
+        window.open(`https://api.whatsapp.com/send?text=${text}%20${url}`, '_blank');
+    }
+
+    // --- Event Listeners ---
+    chatForm.addEventListener('submit', handleFormSubmit);
+    exportPdfBtn.addEventListener('click', exportToPDF);
+    shareWhatsAppBtn.addEventListener('click', shareOnWhatsApp);
+
+    // --- Initial Load ---
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchAndCacheGitaData();
+    });
+
+</script>
+</body>
+</html>
